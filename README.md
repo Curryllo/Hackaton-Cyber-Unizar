@@ -446,6 +446,17 @@ Este repositorio contiene los archivos de configuración clave utilizados para l
 
 ---
 
+## 👥 Autores
+
+Este proyecto fue desarrollado por el equipo **zeroday** durante el Hackathon de Ciberseguridad de la Universidad de Zaragoza:
+
+- **Emilliano Recuenco López**
+- **José Miguel Quílez Vergara**
+- **Jorge Lucas Ferrer**
+- **Curro Valero Casajus**
+
+---
+
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT. Consulta el archivo [`LICENSE`](LICENSE) para más detalles.
