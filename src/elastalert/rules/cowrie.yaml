@@ -1,0 +1,63 @@
+name: cowrie_login
+type: frequency
+index: logstash-*
+
+num_events: 1
+timeframe:
+  minutes: 60
+
+filter:
+  - query:
+      query_string:
+        query: >
+          eventid:cowrie.*
+
+doc_type: _doc
+fields:
+  - "username"
+  - "src_ip"
+  - "geoip.as_org"
+  - "geoip.country_name"
+  - "geoip_ext.region_name"
+  - "@timestamp"
+
+
+query_key: ["src_ip"]
+
+realert:
+  minutes: 1440
+
+alert:
+  - "command"
+
+alert_subject: "Alerta Cowrie: intento de acceso de %(username)s desde %(src_ip)s"
+alert_subject_args:
+  - "username"
+  - "src_ip"
+
+alert_text_type: alert_text_only
+alert_text: |
+  Se ha detectado un evento de Cowrie:
+  - Usuario: %(username)s
+  - IP origen: %(src_ip)s
+  - Organización: %(geoip.as_org)s
+  - País: %(geoip.country_name)s
+  - Región: %(geoip_ext.region_name)s
+  - Fecha/hora: %(@timestamp)s
+
+command:
+  - "python3"
+  - "/opt/elastalert/scripts/alerta_cowrie_login.py"
+  - "--user"
+  - "%(username)s"
+  - "--remip"
+  - "%(src_ip)s"
+  - "--as_org"
+  - "%(geoip.as_org)s"
+  - "--country"
+  - "%(geoip.country_name)s"
+  - "--region"
+  - "%(geoip_ext.region_name)s"
+  - "--timestamp"
+  - "%(@timestamp)s"
+  

@@ -1,0 +1,30 @@
+# Carpeta donde estan las reglas de Elastalert
+rules_folder: /opt/elastalert/rules
+
+# Host y puerto donde esta corriendo Elasticsearch
+es_host: elasticsearch
+es_port: 9200
+
+# Opcion para conexion segura HTTPS
+use_ssl: False
+
+# Cada cuanto tiempo se ejecuta Elastalert para buscar nuevas alertas
+run_every:
+  minutes: 1
+
+# Intervalo para mirar hacia atras en los logs y agrupar eventos
+buffer_time:
+  minutes: 15
+
+# Verificar certificados SSL/TLS
+verify_certs: False
+
+# indice donde Elastalert guarda su estado y alertas enviadas
+writeback_index: elastalert_alerts
+
+# Tiempo maximo para mantener alertas activas (en dias)
+alert_time_limit:
+  days: 2
+
+# No mostrar avisos relacionados con SSL (util para pruebas sin certificados validos)
+ssl_show_warn: False
