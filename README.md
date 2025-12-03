@@ -40,16 +40,43 @@ TheHive se desplegó rápidamente utilizando Docker para asegurar una versión e
     -p 9000:9000 \
     strangebee/thehive:5.4.6-1
     ```
-* **Hardware:** Lenovo (8GB RAM, 1TB Almacenamiento, 4 Cores).
+* **Hardware:** Lenovo (8GB RAM, 1TB Almacenamiento, 4 Cores) - Ubicada en la casa de uno de los integrantes del equipo.
 * **Acceso Inicial:** `https://thehive.eslus.org` (Puerto interno `9000`).
-* **Usuario de Análisis:** Se creó la organización y el usuario **`Zeroday`** para gestionar los casos y alertas.
+* **Usuario Admin:** Se utilizó la cuenta de administrador para la configuración inicial de TheHive.
+* **Usuario de Análisis:** Se creó la organización y el usuario **`Zeroday`** con permisos de **analista** para gestionar los casos y alertas.
+
+#### Configuración Previa de TheHive
+
+Para que los scripts de ElastAlert2 funcionen correctamente, es necesario configurar tipos de observables personalizados en TheHive (se realizó desde la cuenta de administrador):
+
+1. **Crear Observable Type `account`:**
+   - Ir a: **Settings > Observables > Custom Observable Types**
+   - Crear nuevo tipo con nombre: `account`
+   - Descripción: "Cuenta de usuario comprometida"
+   - Se utiliza para representar nombres de usuario atacados
+
+2. **Crear Observable Type `region`:**
+   - Ir a: **Settings > Observables > Custom Observable Types**
+   - Crear nuevo tipo con nombre: `region`
+   - Descripción: "Región geográfica de origen"
+   - Se utiliza para representar regiones de donde provienen los ataques
+
+3. **Generar API Key:**
+   - Ir a: **Settings > API Keys**
+   - Crear una nueva API Key (desde la cuenta de administrador o con permisos suficientes)
+   - Copiar el valor y guardarlo en `src/elastalert/scripts/thehive_methods.py` en la variable `thehive_api_key`
+
+4. **Asignar permisos al usuario Zeroday:**
+   - Rol: **Analyst** (Analista)
+   - Permisos: Lectura y escritura de casos, alertas y tareas
+   - Organización: Zeroday
 
 ### 2. Despliegue de T-Pot (Plataforma de Honeypot)
 
 T-Pot se instaló en una máquina virtual dedicada con los recursos necesarios para orquestar múltiples honeypots.
 
 * **Versión T-Pot:** `24.04.1`
-* **Plataforma Host:** N100 (16GB RAM, 526GB Almacenamiento, 4 Cores) bajo OpenNebula.
+* **Plataforma Host:** N100 (16GB RAM, 526GB Almacenamiento, 4 Cores) bajo OpenNebula - Ubicada en la casa de uno de los integrantes del equipo.
 * **VM (Debian 12) Requisitos:** 8GB RAM, 254GB Espacio, 4 CPUs.
 * **IP Interna:** `192.168.0.101`
 * **Pasos de Instalación:**
@@ -205,6 +232,11 @@ Este flujo asegura que el analista no tenga que pasar tiempo buscando actividad 
 - `ip`: IP del atacante
 - `autonomous-system`: ASN de la organización
 - `region`: Región geográfica
+
+**Nota importante:** Los tipos de observable `account` y `region` son personalizados en TheHive y debieron ser creados manualmente en la configuración de TheHive para que los scripts pudieran utilizarlos. Estos tipos se pueden crear en:
+- **TheHive > Settings > Observables > Custom Observable Types**
+- **Tipo `account`:** Para representar cuentas de usuario comprometidas
+- **Tipo `region`:** Para representar regiones geográficas de origen de ataques
 
 ---
 
