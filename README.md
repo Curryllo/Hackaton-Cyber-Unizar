@@ -140,12 +140,12 @@ Se utiliza un *proxy inverso* y un CDN para publicar los servicios de forma segu
 | Servicio | IP Interna | Puerto Externo | Puerto Interno | Protocolo |
 | :--- | :--- | :--- | :--- | :--- |
 | **T-Pot** | `192.168.0.101` | SSH: 64295 | SSH: 22 | SSH |
-| **T-Pot (Web/Nginx)** | `192.168.0.101` | 64297 | 64297 | HTTPS |
+| **T-Pot (Web/Nginx)** | `192.168.0.101` | HTTPS: 443  | 64297 | HTTPS |
 | **Kibana (T-Pot)** | `192.168.0.101` | 64296 (local) | 5601 | HTTP |
 | **Elasticsearch (T-Pot)** | `192.168.0.101` | 64298 (local) | 9200 | HTTP |
 | **Cowrie SSH Honeypot** | `192.168.0.101` | 22 | 22 | SSH |
 | **TheHive** | `192.168.0.16` | HTTPS: 443 | 9000 | HTTPS |
-| **Dominios Cloudflare** | - | HTTPS | - | HTTPS |
+
 
 ### Índices de Elasticsearch
 
