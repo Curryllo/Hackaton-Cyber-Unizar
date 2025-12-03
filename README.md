@@ -43,7 +43,8 @@ TheHive se desplegó rápidamente utilizando Docker para asegurar una versión e
 * **Hardware:** Lenovo (8GB RAM, 1TB Almacenamiento, 4 Cores) - Ubicada en la casa de uno de los integrantes del equipo.
 * **Acceso Inicial:** `https://thehive.eslus.org` (Puerto interno `9000`).
 * **Usuario Admin:** Se utilizó la cuenta de administrador para la configuración inicial de TheHive.
-* **Usuario de Análisis:** Se creó la organización y el usuario **`Zeroday`** con permisos de **analista** para gestionar los casos y alertas.
+* **Organización:** Se creó la organización **`Hackaton`** en TheHive.
+* **Usuario de Análisis:** Se creó el usuario **`Zeroday`** con permisos de **analista** para gestionar los casos y alertas dentro de la organización Hackaton.
 
 #### Configuración Previa de TheHive
 
@@ -69,7 +70,7 @@ Para que los scripts de ElastAlert2 funcionen correctamente, es necesario config
 4. **Asignar permisos al usuario Zeroday:**
    - Rol: **Analyst** (Analista)
    - Permisos: Lectura y escritura de casos, alertas y tareas
-   - Organización: Zeroday
+   - Organización: **Hackaton**
 
 ### 2. Despliegue de T-Pot (Plataforma de Honeypot)
 
