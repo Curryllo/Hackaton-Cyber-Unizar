@@ -147,7 +147,7 @@ Se utiliza un *proxy inverso* y un CDN para publicar los servicios de forma segu
 | **TheHive** | `192.168.0.16` | HTTPS: 443 | 9000 | HTTPS |
 
 
-### Índices de Elasticsearch
+### Índices de Elasticsearch 
 
 Los eventos de T-Pot se almacenan en índices siguiendo este patrón:
 
