@@ -31,6 +31,7 @@ La solución se compone de dos despliegues principales (T-Pot y TheHive) integra
 TheHive se desplegó rápidamente utilizando Docker para asegurar una versión estable y controlada.
 
 * **Versión Elegida:** `5.4.6-1`
+* **IP Interna:** `192.168.0.16`
 * **Comando de Despliegue:**
     ```bash
     docker pull strangebee/thehive:5.4.6-1
@@ -46,8 +47,10 @@ TheHive se desplegó rápidamente utilizando Docker para asegurar una versión e
 
 T-Pot se instaló en una máquina virtual dedicada con los recursos necesarios para orquestar múltiples honeypots.
 
+* **Versión T-Pot:** `24.04.1`
 * **Plataforma Host:** N100 (16GB RAM, 526GB Almacenamiento, 4 Cores) bajo OpenNebula.
 * **VM (Debian 12) Requisitos:** 8GB RAM, 254GB Espacio, 4 CPUs.
+* **IP Interna:** `192.168.0.101`
 * **Pasos de Instalación:**
     ```bash
     sudo apt update
@@ -61,7 +64,13 @@ T-Pot se instaló en una máquina virtual dedicada con los recursos necesarios p
     ```bash
     ssh -p 64295 root@192.168.0.101
     ```
-* **URL de Acceso:** `https://tpot.eslus.org`
+* **URL de Acceso:** `https://tpot.eslus.org` (Puerto interno `64297`)
+* **Componentes internos de T-Pot:**
+  - **Elasticsearch:** `8.19.2` - Almacena todos los eventos y logs de los honeypots (Puerto: 9200)
+  - **Kibana:** Panel de visualización integrado en T-Pot para análisis de eventos (Puerto: 5601)
+  - **Acceso local:** En la máquina T-Pot se puede acceder directamente a:
+    - Elasticsearch: `http://localhost:9200`
+    - Kibana: `http://localhost:5601`
 
 ### 3. Integración Automatizada (ElastAlert2)
 
@@ -80,6 +89,59 @@ Se utiliza un *proxy inverso* y un CDN para publicar los servicios de forma segu
     * `https://thehive.eslus.org`
     * `https://tpot.eslus.org`
 * **Certificados:** Almacenados en `/etc/haproxy/certs`.
+
+---
+
+## 🔧 Especificaciones Técnicas
+
+### Versiones de Software
+
+| Componente | Versión | Descripción |
+| :--- | :--- | :--- |
+| **T-Pot** | `24.04.1` | Plataforma orchestrada de honeypots |
+| **Elasticsearch** | `8.19.2` | Motor de búsqueda y almacenamiento de eventos |
+| **Kibana** | Integrada en T-Pot | Visualización de datos de Elasticsearch |
+| **TheHive** | `5.4.6-1` | Plataforma de gestión de incidentes |
+| **ElastAlert2** | Última versión oficial | Motor de detección y alerta |
+| **Debian** | `12` | Sistema operativo de T-Pot |
+
+### Configuración de Red
+
+| Servicio | IP Interna | Puerto Externo | Puerto Interno | Protocolo |
+| :--- | :--- | :--- | :--- | :--- |
+| **T-Pot** | `192.168.0.101` | SSH: 64295 | SSH: 22 | SSH |
+| **T-Pot (Web)** | `192.168.0.101` | HTTPS: 443 | 64297 | HTTPS |
+| **Elasticsearch (T-Pot)** | `192.168.0.101` | N/A | 9200 | HTTP |
+| **Kibana (T-Pot)** | `192.168.0.101` | N/A | 5601 | HTTP |
+| **TheHive** | `192.168.0.16` | HTTPS: 443 | 9000 | HTTPS |
+| **Dominios Cloudflare** | - | HTTPS | - | HTTPS |
+
+### Índices de Elasticsearch
+
+Los eventos de T-Pot se almacenan en índices siguiendo este patrón:
+
+- **Patrón:** `logstash-YYYY.MM.DD` (ejemplo: `logstash-2025-12-03`)
+- **Índices activos:** Se crean automáticamente cada día
+- **Recolección:** Todos los honeypots escriben en el mismo Elasticsearch centralizado
+- **Campos principales de eventos Cowrie:**
+  - `eventid`: Identificador del evento (ej: `cowrie.session.connect`)
+  - `username`: Usuario del intento de acceso
+  - `src_ip`: IP origen del atacante
+  - `geoip.as_org`: ASN/Organización de la IP
+  - `geoip.country_name`: País de origen
+  - `geoip_ext.region_name`: Región de origen
+  - `@timestamp`: Timestamp del evento
+
+### Límites y Umbrales
+
+| Parámetro | Valor | Descripción |
+| :--- | :--- | :--- |
+| **Frecuencia ElastAlert2** | 1 minuto | Se ejecuta cada minuto para buscar nuevos eventos |
+| **Buffer de búsqueda** | 15 minutos | Ventana hacia atrás para agrupar eventos |
+| **TTL de alertas** | 2 días | Tiempo que se mantienen activas las alertas |
+| **Reintentos (crear alerta)** | 3 intentos | Con 5 segundos de espera entre intentos |
+| **Reintentos (crear caso)** | Indefinidos | Reintenta cada 5 segundos hasta lograrlo |
+| **Re-alerta por IP** | 24 horas | No re-alerta de la misma IP en 24 horas |
 
 ---
 
