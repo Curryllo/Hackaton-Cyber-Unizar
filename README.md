@@ -1,7 +1,7 @@
 # CYBERARENA - Proyecto del equipo *zeroday*
 # 🛡️ Detección y Análisis Automatizado de Amenazas con T-Pot y TheHive
 
-Este proyecto implementa un sistema automatizado de inteligencia de amenazas, utilizando el honeypot **T-Pot** para la recolección de ataques de bajo nivel y **TheHive** para la gestión y el análisis de incidentes.
+Este proyecto implementa un sistema automatizado de inteligencia de amenazas, utilizando el honeypot **T-Pot** para la recolección de ataques de bajo nivel y **TheHive** para la gestión y el análisis de incidentes. 
 
 ---
 
@@ -453,7 +453,7 @@ Este proyecto fue desarrollado por el equipo **zeroday** durante el Hackathon de
 - **Emilliano Recuenco López**
 - **José Miguel Quílez Vergara**
 - **Jorge Lucas Ferrer**
-- **Curro Valero Casajús**
+- **Curro Valero Casajús** 
 
 ---
 
