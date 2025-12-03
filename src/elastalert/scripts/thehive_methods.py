@@ -4,8 +4,8 @@ import json
 import time
 
 # Configuracion de TheHive
-thehive_url = 'URL_DE_TU_THEHIVE'
-thehive_api_key = 'API_KEY_DE_TU_THEHIVE'
+thehive_url = 'XXXXXXXX'  # URL de LA instancia de TheHive
+thehive_api_key = 'XXXXXXXX' # API Key de TheHive
 
 def crear_alerta(alert_data, max_retries=3, retry_delay=5):
     url = f"{thehive_url}/api/v1/alert"
