@@ -51,13 +51,13 @@ TheHive se desplegó rápidamente utilizando Docker para asegurar una versión e
 Para que los scripts de ElastAlert2 funcionen correctamente, es necesario configurar tipos de observables personalizados en TheHive (se realizó desde la cuenta de administrador):
 
 1. **Crear Observable Type `account`:**
-   - Ir a: **Settings > Observables > Custom Observable Types**
+   - Ir a: **Gestión de entidades > Tipo observables > Añadir tipo de observable**
    - Crear nuevo tipo con nombre: `account`
    - Descripción: "Cuenta de usuario comprometida"
    - Se utiliza para representar nombres de usuario atacados
 
 2. **Crear Observable Type `region`:**
-   - Ir a: **Gestión de entidades> Tipo observables > Añadir tipo de observable**
+   - Ir a: **Gestión de entidades > Tipo observables > Añadir tipo de observable**
    - Crear nuevo tipo con nombre: `region`
    - Descripción: "Región geográfica de origen"
    - Se utiliza para representar regiones de donde provienen los ataques
@@ -235,7 +235,7 @@ Este flujo asegura que el analista no tenga que pasar tiempo buscando actividad 
 - `region`: Región geográfica
 
 **Nota importante:** Los tipos de observable `account` y `region` son personalizados en TheHive y debieron ser creados manualmente en la configuración de TheHive para que los scripts pudieran utilizarlos. Estos tipos se pueden crear en:
-- **TheHive > Settings > Observables > Custom Observable Types**
+- **TheHive > Gestión de entidades > Tipo observables > Añadir tipo de observable**
 - **Tipo `account`:** Para representar cuentas de usuario comprometidas
 - **Tipo `region`:** Para representar regiones geográficas de origen de ataques
 
