@@ -116,7 +116,6 @@ Se utiliza un *proxy inverso* y un CDN para publicar los servicios de forma segu
 | **Kibana (T-Pot)** | `192.168.0.101` | 64296 (local) | 5601 | HTTP |
 | **Elasticsearch (T-Pot)** | `192.168.0.101` | 64298 (local) | 9200 | HTTP |
 | **Cowrie SSH Honeypot** | `192.168.0.101` | 22 | 22 | SSH |
-| **SNARE** | `192.168.0.101` | 80 | 80 | HTTP |
 | **TheHive** | `192.168.0.16` | HTTPS: 443 | 9000 | HTTPS |
 | **Dominios Cloudflare** | - | HTTPS | - | HTTPS |
 
