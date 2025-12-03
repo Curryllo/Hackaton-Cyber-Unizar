@@ -57,7 +57,7 @@ Para que los scripts de ElastAlert2 funcionen correctamente, es necesario config
    - Se utiliza para representar nombres de usuario atacados
 
 2. **Crear Observable Type `region`:**
-   - Ir a: **Settings > Observables > Custom Observable Types**
+   - Ir a: **Gestión de entidades> Tipo observables > Añadir tipo de observable**
    - Crear nuevo tipo con nombre: `region`
    - Descripción: "Región geográfica de origen"
    - Se utiliza para representar regiones de donde provienen los ataques
