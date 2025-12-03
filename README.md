@@ -97,6 +97,224 @@ Este flujo asegura que el analista no tenga que pasar tiempo buscando actividad 
 
 ---
 
+## 📋 Descripción Técnica de los Scripts
+
+### 1. `alerta_cowrie_login.py` - Creación de Alertas Individuales
+
+**Función:** Se ejecuta cada vez que ElastAlert2 detecta un evento de login en Cowrie. Crea una **alerta individual** en TheHive.
+
+**Proceso:**
+1. Recibe parámetros desde ElastAlert2 (usuario, IP, ASN, país, región, timestamp)
+2. Genera un identificador único basado en timestamp
+3. Construye la estructura de datos de la alerta con observables
+4. Envía la alerta a TheHive mediante API REST
+
+**Parámetros aceptados:**
+- `--user`: Usuario que intentó acceder
+- `--remip`: IP origen del ataque
+- `--as_org`: ASN/Organización de la IP
+- `--country`: País origen
+- `--region`: Región origen
+- `--timestamp`: Fecha/hora del evento
+
+**Observables generados:**
+- `account`: Nombre de usuario atacado
+- `ip`: IP del atacante
+- `autonomous-system`: ASN de la organización
+- `region`: Región geográfica
+
+---
+
+### 2. `caso_cowrie_login.py` - Creación de Casos Diarios Resumidos
+
+**Función:** Agrega todas las alertas de Cowrie de las últimas 24 horas en un **caso único** con estadísticas consolidadas.
+
+**Proceso:**
+1. Consulta TheHive buscando alertas de Cowrie etiquetadas con `cowrie` y estado `New` de las últimas 24 horas
+2. Extrae información de cada alerta (usuario, IP, ASN, país, región)
+3. Calcula estadísticas:
+   - Total de eventos
+   - IPs únicas
+   - Usuarios atacados
+   - ASNs/organizaciones
+   - Países y regiones
+4. Crea un caso único con título como `Resumen de Login de Cowrie - YYYY-MM-DD HH:MM:SS`
+5. Vincula todas las alertas al caso creado
+6. Incluye observables consolidados (todas las IPs, usuarios, ASNs, etc.)
+
+**Características:**
+- Reintento automático si falla la conexión (cada 5 segundos indefinidamente)
+- Timestamp de primer y último evento del rango
+- Severidad: Media (nivel 2)
+- Estado inicial: `New`
+- Etiquetas: `cowrie`, `honeypot`, `brute-force`, `ssh`, `daily-report`
+
+---
+
+### 3. `thehive_methods.py` - Módulo de Integración con TheHive
+
+**Función:** Proporciona funciones reutilizables para interactuar con la API de TheHive.
+
+**Funciones principales:**
+
+#### `crear_alerta(alert_data, max_retries=3, retry_delay=5)`
+- **Parámetros:**
+  - `alert_data`: Diccionario con los datos de la alerta
+  - `max_retries`: Número máximo de reintentos (defecto: 3)
+  - `retry_delay`: Segundos entre reintentos (defecto: 5)
+- **Retorna:** JSON con la alerta creada o `None` si falla
+- **Manejo de errores:** Reintenta automáticamente con espera entre intentos
+
+#### `crear_caso(titulo, descripcion, observables, severity, tags, status)`
+- **Parámetros:**
+  - `titulo`: Título del caso
+  - `descripcion`: Descripción detallada
+  - `observables`: Lista de observables a incluir
+  - `severity`: Nivel de severidad (1-3)
+  - `tags`: Lista de etiquetas
+  - `status`: Estado inicial del caso
+- **Retorna:** JSON con el caso creado o `None` si falla
+
+#### `vincular_caso_a_alerta(caso_id, alerta_id)`
+- **Parámetros:** ID del caso e ID de la alerta
+- **Retorna:** JSON con información del vinculado o `None` si falla
+- **Función:** Crea la relación entre una alerta y un caso existente
+
+#### `crear_caso_cowrie_24h()`
+- **Función:** Orquesta todo el proceso de búsqueda, agregación y creación de casos diarios
+- **Sin parámetros**
+- **Retorna:** `True` si éxito, `False` si falla
+
+**Configuración requerida (líneas 5-6):**
+```python
+thehive_url = 'XXXXXXXX'      # URL de la instancia TheHive (ej: https://thehive.eslus.org)
+thehive_api_key = 'XXXXXXXX'  # API Key de TheHive (generar desde TheHive > Settings > API Keys)
+```
+
+---
+
+### 4. `cowrie.yaml` - Regla de ElastAlert2
+
+**Función:** Define cómo ElastAlert2 detecta eventos de Cowrie en Elasticsearch.
+
+**Configuración:**
+
+- **Tipo:** `frequency` - Dispara cuando detecta al menos N eventos en un timeframe
+- **Índice:** `logstash-*` - Busca en todos los índices de Logstash
+- **Filtro:** Busca eventos con `eventid:cowrie.*`
+- **Campos monitoreados:**
+  - `username`: Usuario del intento de acceso
+  - `src_ip`: IP origen
+  - `geoip.as_org`: ASN/Organización
+  - `geoip.country_name`: País
+  - `geoip_ext.region_name`: Región
+  - `@timestamp`: Fecha/hora del evento
+
+- **Parámetros de disparo:**
+  - `num_events: 1` - Se dispara con 1 evento
+  - `timeframe: 60 minutos` - Busca en última hora
+  - `query_key: ["src_ip"]` - Agrupa por IP origen
+  - `realert: 1440 minutos` - No re-alerta de la misma IP en 24h
+
+- **Acción:** Ejecuta `alerta_cowrie_login.py` con los parámetros extraídos de Elasticsearch
+
+---
+
+### 5. `config.yaml` - Configuración de ElastAlert2
+
+**Parámetros clave:**
+
+```yaml
+rules_folder: /opt/elastalert/rules              # Donde ElastAlert2 busca las reglas
+es_host: elasticsearch                           # Host de Elasticsearch
+es_port: 9200                                    # Puerto de Elasticsearch
+use_ssl: False                                   # Usar HTTPS (deshabilitado para pruebas)
+run_every: minutes: 1                            # Ejecutar búsqueda cada minuto
+buffer_time: minutes: 15                         # Ventana de búsqueda: últimos 15 min
+verify_certs: False                              # No verificar certificados SSL
+writeback_index: elastalert_alerts               # Índice donde guarda su estado
+alert_time_limit: days: 2                        # Mantener alertas 2 días
+ssl_show_warn: False                             # No mostrar advertencias SSL
+```
+
+---
+
+### 6. `Dockerfile` - Imagen Personalizada de ElastAlert2
+
+**Base:** `jertel/elastalert2` - Imagen oficial de ElastAlert2
+
+**Personalización:**
+- Usuario: `elastalert` (sin privilegios de root)
+- Los volúmenes se montan en tiempo de ejecución (config, reglas, scripts)
+
+---
+
+### 7. `deploy.sh` - Script de Despliegue
+
+**Funciones:**
+
+1. **Construye la imagen Docker personalizada**
+   ```bash
+   docker build -t elastalert2-custom /home/debian/elastalert/docker
+   ```
+
+2. **Despliega el contenedor ElastAlert2** conectado a la red T-Pot
+   - Monta volúmenes para: configuración, reglas, scripts
+   - Se conecta a la red `tpotce_nginx_local` para comunicarse con Elasticsearch
+   - Ejecuta en modo daemon con logs verbosos
+
+**Volúmenes montados:**
+- `/opt/elastalert/config.yaml` ← Configuración
+- `/opt/elastalert/rules/` ← Reglas de detección
+- `/opt/elastalert/scripts/` ← Scripts de integración con TheHive
+
+---
+
+## 🔄 Flujo Completo de Automatización
+
+```
+1. ATAQUE → T-Pot (Cowrie) detecta intento de login
+                    ↓
+2. REGISTRO → Elasticsearch almacena el evento (logstash-*)
+                    ↓
+3. ESCANEO → ElastAlert2 busca eventos cada minuto
+                    ↓
+4. COINCIDENCIA → cowrie.yaml detecta el evento
+                    ↓
+5. ALERTA → alerta_cowrie_login.py crea alerta en TheHive
+                    ↓
+6. AGREGACIÓN → caso_cowrie_login.py agrupa alertas de 24h
+                    ↓
+7. CASO → Se crea caso diario con estadísticas consolidadas
+                    ↓
+8. ANÁLISIS → Usuario "Zeroday" revisa el caso en TheHive
+```
+
+---
+
+### Configuración de Crontab
+
+Para ejecutar automáticamente el script de análisis de Cowrie cada 10 minutos (útil para pruebas), se puede configurar una tarea en crontab:
+
+1. **Abrir el editor de crontab:**
+    ```bash
+    crontab -e
+    ```
+
+2. **Añadir la siguiente línea:**
+    ```bash
+    */10 * * * * /usr/bin/python3 /home/debian/elastalert/scripts/caso_cowrie_login.py
+    ```
+
+3. **Guardar y salir** (en nano: `Ctrl+O`, `Enter`, `Ctrl+X`).
+
+**Nota:** Esta configuración ejecuta el script cada 10 minutos. Para cambiar la frecuencia a cada 24 horas (configuración recomendada en producción), utiliza:
+```bash
+0 0 * * * /usr/bin/python3 /home/debian/elastalert/scripts/caso_cowrie_login.py
+```
+
+---
+
 ### Código del Proyecto
 
 Este repositorio contiene los archivos de configuración clave utilizados para la implementación:
