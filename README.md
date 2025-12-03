@@ -32,6 +32,7 @@ TheHive se desplegó rápidamente utilizando Docker para asegurar una versión e
 
 * **Versión Elegida:** `5.4.6-1`
 * **IP Interna:** `192.168.0.16`
+* **Sistema Operativo:** `Ubuntu Server`
 * **Comando de Despliegue:**
     ```bash
     docker pull strangebee/thehive:5.4.6-1
@@ -104,15 +105,18 @@ Se utiliza un *proxy inverso* y un CDN para publicar los servicios de forma segu
 | **TheHive** | `5.4.6-1` | Plataforma de gestión de incidentes |
 | **ElastAlert2** | Última versión oficial | Motor de detección y alerta |
 | **Debian** | `12` | Sistema operativo de T-Pot |
+| **Ubuntu Server** | LTS | Sistema operativo de TheHive |
 
 ### Configuración de Red
 
 | Servicio | IP Interna | Puerto Externo | Puerto Interno | Protocolo |
 | :--- | :--- | :--- | :--- | :--- |
 | **T-Pot** | `192.168.0.101` | SSH: 64295 | SSH: 22 | SSH |
-| **T-Pot (Web)** | `192.168.0.101` | HTTPS: 443 | 64297 | HTTPS |
-| **Elasticsearch (T-Pot)** | `192.168.0.101` | N/A | 9200 | HTTP |
-| **Kibana (T-Pot)** | `192.168.0.101` | N/A | 5601 | HTTP |
+| **T-Pot (Web/Nginx)** | `192.168.0.101` | 64297 | 64297 | HTTPS |
+| **Kibana (T-Pot)** | `192.168.0.101` | 64296 (local) | 5601 | HTTP |
+| **Elasticsearch (T-Pot)** | `192.168.0.101` | 64298 (local) | 9200 | HTTP |
+| **Cowrie SSH Honeypot** | `192.168.0.101` | 22 | 22 | SSH |
+| **SNARE** | `192.168.0.101` | 80 | 80 | HTTP |
 | **TheHive** | `192.168.0.16` | HTTPS: 443 | 9000 | HTTPS |
 | **Dominios Cloudflare** | - | HTTPS | - | HTTPS |
 
@@ -132,7 +136,25 @@ Los eventos de T-Pot se almacenan en índices siguiendo este patrón:
   - `geoip_ext.region_name`: Región de origen
   - `@timestamp`: Timestamp del evento
 
-### Límites y Umbrales
+### Honeypots Activos en T-Pot 24.04.1
+
+T-Pot orquesta múltiples honeypots de baja y media interacción. Los principales activos son:
+
+| Honeypot | Puerto(s) | Descripción | Servicio Simulado |
+| :--- | :--- | :--- | :--- |
+| **Cowrie** | 22-23 | Honeypot SSH de media interacción | OpenSSH |
+| **Dionaea** | 20-21, 42, 81, 135, 445, 1433, 1723, 1883, 3306, 27017, 69 | Honeypot multi-protocolo | FTP, TFTP, HTTP, RPC, SMB, MSSQL, PPTP, MQTT, MySQL, MongoDB |
+| **Heralding** | 110, 143, 465, 993, 995, 1080, 5432, 5900 | Captura de credenciales | POP3, IMAP, SMTP, SOCKS, PostgreSQL, VNC |
+| **SNARE** | 80 | Honeypot web en PHP | Sitio web vulnerable |
+| **Wordpot** | 8080 | Honeypot WordPress | Réplica WordPress vulnerable |
+| **IPPHoney** | 631 | Honeypot de impresora | CUPS/IPP |
+| **Honeytrap** | Varios | Honeypot genérico TCP | Servicios desconocidos |
+
+**Datos recibidos por ElastAlert2:**
+- ElastAlert2 monitoriza principalmente los eventos de **Cowrie** para crear alertas en TheHive
+- Se pueden añadir nuevas reglas para otros honeypots siguiendo el patrón de `cowrie.yaml`
+
+---
 
 | Parámetro | Valor | Descripción |
 | :--- | :--- | :--- |
