@@ -453,7 +453,7 @@ Este proyecto fue desarrollado por el equipo **zeroday** durante el Hackathon de
 - **Emilliano Recuenco López**
 - **José Miguel Quílez Vergara**
 - **Jorge Lucas Ferrer**
-- **Curro Valero Casajus**
+- **Curro Valero Casajús**
 
 ---
 
