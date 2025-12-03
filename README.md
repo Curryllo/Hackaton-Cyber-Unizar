@@ -63,8 +63,8 @@ Para que los scripts de ElastAlert2 funcionen correctamente, es necesario config
    - Se utiliza para representar regiones de donde provienen los ataques
 
 3. **Generar API Key:**
-   - Ir a: **Settings > API Keys**
-   - Crear una nueva API Key (desde la cuenta de administrador o con permisos suficientes)
+   - Ir a: **Ajustes > Clave API**
+   - Crear una nueva API Key (desde la cuenta del analista)
    - Copiar el valor y guardarlo en `src/elastalert/scripts/thehive_methods.py` en la variable `thehive_api_key`
 
 4. **Asignar permisos al usuario Zeroday:**
